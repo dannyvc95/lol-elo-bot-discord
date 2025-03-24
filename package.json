@@ -1,0 +1,32 @@
+{
+  "name": "lol-elo-bot-discord",
+  "version": "1.0.0",
+  "description": "",
+  "main": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "ts-node src/index.ts",
+    "clean": "rm -rf dist",
+    "dev": "nodemon --watch src --ext ts --exec ts-node src/index.ts",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix ."
+  },
+  "author": "Daniel Valle",
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^9.23.0",
+    "@types/node": "^22.13.11",
+    "eslint": "^9.23.0",
+    "globals": "^16.0.0",
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.27.0"
+  },
+  "dependencies": {
+    "axios": "^1.8.4",
+    "discord.js": "^14.18.0",
+    "dotenv": "^16.4.7"
+  }
+}
