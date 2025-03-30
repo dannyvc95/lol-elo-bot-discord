@@ -10,7 +10,7 @@ export const calculateWinRate = (wins: number, losses: number): number => {
 };
 
 export const getTierImageSource = (tier: Tier): string => {
-    return `${process.env.OP_GG_TIER_IMAGE_SRC}/${tier.toLowerCase()}.png?image=q_auto:good,f_webp,w_200`;
+    return `${process.env.ASSETS_IMAGE_SOURCE}/${tier.toLowerCase()}.png`;
 };
 
 export const getTierColor = (tier: Tier): ColorResolvable | null => {
@@ -22,4 +22,9 @@ export const getTierColor = (tier: Tier): ColorResolvable | null => {
 
 export const yesNo = (value: boolean): string => {
     return value ? ':white_check_mark: Yes' : ':x: No';
+};
+
+export const getRandomInteger = (length: number): number => {
+    const random = Math.floor(Math.random() * length);
+    return random < length ? random : 0;
 };

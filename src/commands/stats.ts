@@ -1,6 +1,6 @@
 import {EmbedBuilder, Message, OmitPartialGroupDMChannel} from 'discord.js';
 import {commands} from '../events/messageCreate';
-import {getLeagueEntriesBySummonerName} from '../services/riotGamesService';
+import {getLeagueEntriesBySummonerName, getTopChampionMasteryBySummonerName} from '../services/riotGamesService';
 import {calculateWinRate, getTierColor, getTierImageSource, yesNo} from '../utils/utils';
 
 export const handleStats = async (message: OmitPartialGroupDMChannel<Message<boolean>>) => {
@@ -14,6 +14,8 @@ export const handleStats = async (message: OmitPartialGroupDMChannel<Message<boo
             if (leagueEntries) {
                 const rankedSolo = leagueEntries.find(({queueType}) => queueType === 'RANKED_SOLO_5x5');
                 const rankedFlex = leagueEntries.find(({queueType}) => queueType === 'RANKED_FLEX_SR');
+                const topChampionMastery = await getTopChampionMasteryBySummonerName(summonerName);
+
                 const embeds = [];
 
                 if (rankedSolo) {
@@ -25,8 +27,7 @@ export const handleStats = async (message: OmitPartialGroupDMChannel<Message<boo
                         {name: 'Games', value: String(rankedSolo.wins + rankedSolo.losses), inline: true},
                         {name: 'Wins', value: String(rankedSolo.wins), inline: true},
                         {name: 'Losses', value: String(rankedSolo.losses), inline: true},
-                        {name: 'WR', value: `${calculateWinRate(rankedSolo.wins, rankedSolo.losses)}%`, inline: true,
-                        },
+                        {name: 'WR', value: `${calculateWinRate(rankedSolo.wins, rankedSolo.losses)}%`, inline: true},
                         {name: 'Veteran player?', value: yesNo(rankedSolo.veteran), inline: false},
                         {name: 'Inactive player?', value: yesNo(rankedSolo.inactive), inline: false},
                         {name: 'In a hot streak?', value: yesNo(rankedSolo.hotStreak), inline: false},
@@ -63,6 +64,26 @@ export const handleStats = async (message: OmitPartialGroupDMChannel<Message<boo
                         .setFields(fields)
                         .setColor(getTierColor(rankedFlex.tier))
                         .setThumbnail(getTierImageSource(rankedFlex.tier)));
+                }
+
+                if (topChampionMastery) {
+                    const fields = [
+                        {name: 'Champion', value: topChampionMastery.champion.name, inline: true},
+                        {name: 'Mastery points', value: topChampionMastery.points.toLocaleString(), inline: true},
+                        {name: 'Tags', value: topChampionMastery.champion.tags.join(', '), inline: true},
+                        // eslint-disable-next-line max-len
+                        {name: 'Difficulty', value: topChampionMastery.champion.info.difficulty.toString(), inline: true},
+                    ];
+
+                    embeds.push(new EmbedBuilder()
+                        .setTitle('Top mastery champion')
+                        .setDescription('This is your best champion:')
+                        .setFields(fields)
+                        // eslint-disable-next-line max-len
+                        //.setThumbnail(`https://ddragon.leagueoflegends.com/cdn/15.6.1/img/champion/${topChampionMastery.champion.id}.png`)
+                        // eslint-disable-next-line max-len
+                        .setImage(`https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${topChampionMastery.champion.id}_0.jpg`));
+                    // .setThumbnail(getTierImageSource(rankedFlex.tier)));
                 }
 
                 await message.reply({embeds: [...embeds]});

@@ -1,11 +1,16 @@
 import axios, {AxiosError} from 'axios';
 
 import {LeagueEntryDTO} from '../types/LeagueEntryDTO';
+import {ChampionDTO} from '../types/ChampionDTO';
+import {ChampionMasteryDTO} from '../types/ChampionMasteryDTO';
+
+import champion from '../resources/champion.json';
 
 const {
     RIOT_GAMES_API_AMERICAS_ACCOUNTS_BY_RIOT_ID,
     RIOT_GAMES_API_LA1_SUMMONERS_BY_PUUID,
     RIOT_GAMES_API_LA1_ENTRIES_BY_SUMMONER,
+    RIOT_GAMES_API_LA1_CHAMPION_MASTERIES_BY_PUUID,
     RIOT_GAMES_API_KEY,
 } = process.env;
 
@@ -33,6 +38,32 @@ const getSummonerIdByPuuid = async (puuid: string): Promise<string | null> => {
 
         if (status === 200) {
             return data.id;
+        }
+    } catch (error) {
+        console.error((error as AxiosError).cause);
+    }
+
+    return null;
+};
+
+// eslint-disable-next-line max-len
+export const getTopChampionMasteryBySummonerName = async (summonerName: string): Promise<{ champion: ChampionDTO, points: number } | null> => {
+    try {
+        const puuid = await getPuuidBySummonerName(summonerName);
+
+        if (puuid) {
+            // eslint-disable-next-line max-len
+            const {data, status} = await axios.get(`${RIOT_GAMES_API_LA1_CHAMPION_MASTERIES_BY_PUUID}/${puuid}/top?count=1&api_key=${RIOT_GAMES_API_KEY}`);
+
+            if (status === 200 && Array.isArray(data) && data.length > 0) {
+                const championMasteryDTO: ChampionMasteryDTO = data[0];
+                const _champion = Object.values(champion.data).find((champion) =>
+                    champion.key === String(championMasteryDTO.championId));
+
+                if (championMasteryDTO && _champion) {
+                    return {champion: _champion, points: championMasteryDTO.championPoints};
+                }
+            }
         }
     } catch (error) {
         console.error((error as AxiosError).cause);
