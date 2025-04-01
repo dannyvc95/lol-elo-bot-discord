@@ -4,6 +4,7 @@ import {handleElo} from '../commands/elo';
 import {handleInit} from '../commands/init';
 import {handleStats} from '../commands/stats';
 import {handleFlame} from '../commands/flame';
+import {handleFle} from '../commands/fle';
 
 export const commands = {
     ping: '!ping',
@@ -11,6 +12,7 @@ export const commands = {
     init: '!init',
     stats: '!stats ',
     flame: '!flame ',
+    fle: '!fle',
 };
 
 export const handleMessageCreate = async (message: OmitPartialGroupDMChannel<Message<boolean>>) => {
@@ -25,6 +27,8 @@ export const handleMessageCreate = async (message: OmitPartialGroupDMChannel<Mes
             await handleStats(message);
         } else if (message.content.startsWith(commands.flame)) {
             await handleFlame(message);
+        } else if (message.content === commands.fle) {
+            await handleFle(message);
         }
     } catch (error) {
         console.error(error);

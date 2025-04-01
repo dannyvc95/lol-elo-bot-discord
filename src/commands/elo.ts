@@ -1,8 +1,19 @@
-import {EmbedBuilder, Message, OmitPartialGroupDMChannel} from 'discord.js';
+import {
+    ButtonStyle,
+    ComponentType,
+    EmbedBuilder,
+    Message,
+    OmitPartialGroupDMChannel,
+} from 'discord.js';
 import {commands} from '../events/messageCreate';
 import {getLeagueEntriesBySummonerName} from '../services/riotGamesService';
 import {calculateWinRate, getTierColor, getTierImageSource} from '../utils/utils';
-import roles from '../configs/roles.json';
+import {pendingApprovals} from '..';
+
+export const reviewResult = {
+    rejected: 'rejected',
+    approved: 'approved',
+};
 
 export const handleElo = async (message: OmitPartialGroupDMChannel<Message<boolean>>) => {
     try {
@@ -20,7 +31,7 @@ export const handleElo = async (message: OmitPartialGroupDMChannel<Message<boole
                     const fields = [
                         {
                             name: 'Ranked Solo/Duo',
-                            value: `${rankedSoloDuo.tier} ${rankedSoloDuo.rank} (${rankedSoloDuo.leaguePoints} LP)`,
+                            value: `${rankedSoloDuo.tier} ${rankedSoloDuo.rank} (${rankedSoloDuo.leaguePoints} PL)`,
                             inline: false,
                         },
                         {
@@ -44,9 +55,9 @@ export const handleElo = async (message: OmitPartialGroupDMChannel<Message<boole
                             inline: false,
                         },
                         {
-                            name: '\nOP.GG',
+                            name: '\nYour OP.GG',
                             // eslint-disable-next-line max-len
-                            value: `[${summonerName}](${process.env.OP_GG_PROFILE_URL}/${summonerName.replace('#', '-')})`
+                            value: `[op.gg/${summonerName.replace('#', '-')}](${process.env.OP_GG_PROFILE_URL}/${summonerName.replace('#', '-')})`
                         }
                     ];
 
@@ -67,16 +78,34 @@ export const handleElo = async (message: OmitPartialGroupDMChannel<Message<boole
                     const newRole = message.guild?.roles.cache.find((role) => role.name === newRoleName);
 
                     if (member && newRole) {
-                        const rolesToRemove = member.roles.cache.filter((role) =>
-                            role.name in roles).filter((role) => role.name !== 'lol-elo-bot-approver');
-                        // eslint-disable-next-line max-len
-                        console.log(`Updating ${member.displayName} roles:\n\x1b[31m[-] ${rolesToRemove.map((role) => role.name).join(', ')}\x1b[0m\n\x1b[32m[+] ${newRoleName}\x1b[0m`);
+                        const reviewMessage = await message.reply({
+                            embeds: [
+                                new EmbedBuilder()
+                                    .setTitle('Role update')
+                                    .setDescription(`${member.displayName} wants the ${newRole.name} role`)
+                            ],
+                            components: [
+                                {
+                                    components: [
+                                        {
+                                            customId: reviewResult.rejected,
+                                            label: 'Reject',
+                                            style: ButtonStyle.Secondary,
+                                            type: ComponentType.Button
+                                        },
+                                        {
+                                            customId: reviewResult.approved,
+                                            label: 'Approve',
+                                            style: ButtonStyle.Primary,
+                                            type: ComponentType.Button
+                                        }
+                                    ],
+                                    type: ComponentType.ActionRow,
+                                }
+                            ],
+                        });
 
-                        for (const role of rolesToRemove) {
-                            await member.roles.remove(role);
-                        }
-
-                        await member.roles.add(newRole);
+                        pendingApprovals.push({member: member, role: newRole, message: reviewMessage});
                     }
                 } catch (error) {
                     console.error(error);
