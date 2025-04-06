@@ -1,34 +1,85 @@
+import mongoose from 'mongoose';
+import {BotUser, BotUserModel} from '../models/BotUser';
 
-import {MongoClient, ServerApiVersion} from 'mongodb';
-// eslint-disable-next-line max-len
-const uri = 'mongodb+srv://dannyvc95:5HjVpVJjUItWpwHj@lol-elo-bot-db.zjofhwg.mongodb.net/?retryWrites=true&w=majority&appName=lol-elo-bot-db';
+const databaseConfig = {
+    uri: process.env.MONGODB_CONNECTION_URI,
+    dbName: 'lol-elo-bot',
+};
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-    serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-    },
-});
-
-const db = client.db('lol-elo-bot');
-
-export async function run() {
+export async function connectDatabase() {
     try {
-    // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
-        // Send a ping to confirm a successful connection
-        await client.db('admin').command({ping: 1});
-        console.log('Pinged your deployment. You successfully connected to MongoDB!');
-    } finally {
-    // Ensures that the client will close when you finish/error
-        await client.close();
+        if (databaseConfig.uri) {
+            await mongoose.connect(databaseConfig.uri, {dbName: databaseConfig.dbName});
+            console.log('Connected to MongoDB with Mongoose!');
+        }
+    } catch (error) {
+        console.error(error);
     }
 }
 
-export const getTestDocument = async () => {
-    const collection = db.collection('test');
-    const docs = collection.find({type: 'test'});
-    return await docs;
+export const createBotUser = async (botUser: BotUser) => {
+    try {
+        return await new BotUserModel(botUser).save();
+    } catch (error) {
+        console.error(error);
+    }
+    return null;
+};
+
+export const getBotUserByUserId = async (userId: string) => {
+    try {
+        if (userId) {
+            return await BotUserModel.findOne({userId});
+        }
+    } catch (error) {
+        console.error(error);
+    }
+    return null;
+};
+
+export const giveHonor = async (
+    userToGiveUserId: string, giveCount: number, userToReceiveUserId: string, receiveCount: number, free: boolean) => {
+    try {
+        console.log(receiveCount);
+        const updatedUser = await BotUserModel.findOneAndUpdate(
+            {userId: userToReceiveUserId},
+            {$push: {'honor.honorReceived': {userId: userToGiveUserId, date: new Date()}}},
+            {new: true},
+        );
+
+        if (updatedUser) {
+            console.log('Updated User:', updatedUser);
+        } else {
+            console.log('User not found');
+        }
+
+        if (!free) {
+            const uu = await BotUserModel.findOneAndUpdate(
+                {userId: userToGiveUserId},
+                {$set: {'honor.honorBudgetCount': giveCount - 1}},
+                {new: true},
+            );
+
+            if (uu) {
+                console.log('Updated User:', uu);
+            } else {
+                console.log('User not found');
+            }
+        } else {
+            const uu = await BotUserModel.findOneAndUpdate(
+                {userId: userToGiveUserId},
+                {$set: {'honor.lastFreeHonorDate': new Date()}},
+                {new: true},
+            );
+
+            if (uu) {
+                console.log('Updated User:', uu);
+            } else {
+                console.log('User not found');
+            }
+        }
+
+    } catch (error) {
+        console.error('Error updating honor count:', error);
+    }
 };

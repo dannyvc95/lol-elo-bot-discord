@@ -1,0 +1,38 @@
+{
+    "0": {
+        "level": "0",
+        "message": "Intenta hacer un amigo",
+        "image": "https://cdn.communitydragon.org/latest/honor/0.png",
+        "nextLevel": 1
+    },
+    "1": {
+        "level": "1",
+        "message": "Intenta caerle bien a más de una persona",
+        "image": "https://cdn.communitydragon.org/latest/honor/1.png",
+        "nextLevel": 3
+    },
+    "2": {
+        "level": "2",
+        "message": "Intenta frecuentar a tus amistades",
+        "image": "https://cdn.communitydragon.org/latest/honor/2.png",
+        "nextLevel": 5
+    },
+    "3": {
+        "level": "3",
+        "message": "Intenta ser más sociable",
+        "image": "https://cdn.communitydragon.org/latest/honor/3.png",
+        "nextLevel": 10
+    },
+    "4": {
+        "level": "4",
+        "message": "Intenta buscar simps que te den honor",
+        "image": "https://cdn.communitydragon.org/latest/honor/4.png",
+        "nextLevel": 20
+    },
+    "5": {
+        "level": "5",
+        "message": "Felicidades, eres una persona honorable (al menos para el bot)",
+        "image": "https://cdn.communitydragon.org/latest/honor/5.png",
+        "nextLevel": 30
+    }
+}

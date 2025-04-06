@@ -14,8 +14,17 @@
   },
   "author": "Daniel Valle",
   "license": "MIT",
+  "dependencies": {
+    "@types/mongodb": "^4.0.7",
+    "axios": "^1.8.4",
+    "discord.js": "^14.18.0",
+    "dotenv": "^16.4.7",
+    "mongodb": "^6.15.0",
+    "mongoose": "^8.13.1"
+  },
   "devDependencies": {
     "@eslint/js": "^9.23.0",
+    "@types/mongoose": "^5.11.97",
     "@types/node": "^22.13.11",
     "eslint": "^9.23.0",
     "globals": "^16.0.0",
@@ -23,11 +32,5 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.27.0"
-  },
-  "dependencies": {
-    "axios": "^1.8.4",
-    "discord.js": "^14.18.0",
-    "dotenv": "^16.4.7",
-    "mongodb": "^6.15.0"
   }
 }

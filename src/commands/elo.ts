@@ -8,11 +8,9 @@ import {
 import {commands} from '../events/messageCreate';
 import {getLeagueEntriesBySummonerName} from '../services/riotGamesService';
 import {calculateWinRate, getTierColor, getTierImageSource} from '../utils/utils';
-import {pendingApprovals} from '..';
 
-export const reviewResult = {
-    rejected: 'rejected',
-    approved: 'approved',
+const createCustomId = (action: 'approve' | 'reject', userId: string, roleId: string) => {
+    return `${action}|${userId}|${roleId}`;
 };
 
 export const handleElo = async (message: OmitPartialGroupDMChannel<Message<boolean>>) => {
@@ -72,40 +70,33 @@ export const handleElo = async (message: OmitPartialGroupDMChannel<Message<boole
                     await message.reply({embeds: [embed]});
                 }
 
+                // Process to show the approve/reject buttons
                 try {
                     const member = await message.guild?.members.fetch(message.author.id);
-                    const newRoleName = rankedSoloDuo?.tier.toUpperCase();
-                    const newRole = message.guild?.roles.cache.find((role) => role.name === newRoleName);
+                    const newRole = message.guild?.roles.cache.find((role) =>
+                        role.name === rankedSoloDuo?.tier.toUpperCase());
 
                     if (member && newRole) {
-                        const reviewMessage = await message.reply({
-                            embeds: [
-                                new EmbedBuilder()
-                                    .setTitle('Role update')
-                                    .setDescription(`${member.displayName} wants the ${newRole.name} role`)
-                            ],
-                            components: [
-                                {
-                                    components: [
-                                        {
-                                            customId: reviewResult.rejected,
-                                            label: 'Reject',
-                                            style: ButtonStyle.Secondary,
-                                            type: ComponentType.Button
-                                        },
-                                        {
-                                            customId: reviewResult.approved,
-                                            label: 'Approve',
-                                            style: ButtonStyle.Primary,
-                                            type: ComponentType.Button
-                                        }
-                                    ],
-                                    type: ComponentType.ActionRow,
-                                }
-                            ],
+                        await message.reply({
+                            embeds: [{title: '', description: `${member.displayName} wants the ${newRole.name} role`}],
+                            components: [{
+                                components: [
+                                    {
+                                        custom_id: createCustomId('reject', member.id, newRole.id),
+                                        label: 'Reject',
+                                        style: ButtonStyle.Secondary,
+                                        type: ComponentType.Button
+                                    },
+                                    {
+                                        custom_id: createCustomId('approve', member.id, newRole.id),
+                                        label: 'Approve',
+                                        style: ButtonStyle.Primary,
+                                        type: ComponentType.Button
+                                    }
+                                ],
+                                type: ComponentType.ActionRow,
+                            }],
                         });
-
-                        pendingApprovals.push({member: member, role: newRole, message: reviewMessage});
                     }
                 } catch (error) {
                     console.error(error);

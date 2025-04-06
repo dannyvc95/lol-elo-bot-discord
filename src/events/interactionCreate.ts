@@ -1,64 +1,59 @@
-import {CacheType, Interaction, MessageFlags} from 'discord.js';
-import {pendingApprovals} from '..';
-import {reviewResult} from '../commands/elo';
+import {CacheType, GuildMember, Interaction, userMention} from 'discord.js';
 import roles from '../configs/roles.json';
 
-export const handleInteractionCreate = async (interactionCreate: Interaction<CacheType>) => {
-    if (!interactionCreate.isButton()) {
-        return;
+const isApprover = async (interaction: Interaction<CacheType>, userId: string) => {
+    try {
+        const member = await interaction.guild?.members.fetch(userId);
+        return member && member.roles.cache.some(({name}) => name === 'lol-elo-bot-approver');
+    } catch (error) {
+        console.error(error);
     }
+    return false;
+};
 
-    const userId = interactionCreate.member?.user.id;
+const cleanupRoles = async (guildMember: GuildMember) => {
+    try {
+        const removeRoles = guildMember.roles.cache
+            .filter((role) => role.name in roles)
+            .filter((role) => role.name !== 'lol-elo-bot-approver');
 
-    if (userId) {
-        const member = await interactionCreate.guild?.members.fetch(userId);
+        for (const role of removeRoles) {
+            await guildMember.roles.remove(role);
+            console.log(`\x1b[31m[-] ${role[1].name}\x1b[0m`);
+        }
+    } catch (error) {
+        console.error(error);
+    }
+};
 
-        if (member) {
-            // Only members with the approver role can approve or reject requests
-            if (!member?.roles.cache.some(({name}) => name === 'lol-elo-bot-approver')) {
-                return await interactionCreate.reply({
-                    content: '❌ You are not authorized',
-                    flags: [MessageFlags.Ephemeral],
-                });
-            }
+export const handleInteractionCreate = async (interaction: Interaction<CacheType>) => {
+    try {
+        if (interaction.isButton()) {
+            // It's critical to set the custom ID as follows <action>|<user id>|<role id>
+            const [action, userId, roleId] = interaction.customId.split('|');
 
-            const pendingApprovalIndex = pendingApprovals.findIndex((pendingApproval) =>
-                pendingApproval.member.id === member.id);
+            // Validate that the user who clicked the approve/reject button is authorized
+            if (await isApprover(interaction, interaction.user.id) && action && userId && roleId) {
+                const member = await interaction.guild?.members.fetch(userId);
+                const role = await interaction.guild?.roles.fetch(roleId);
 
-            if (pendingApprovalIndex !== -1) {
-                const pendingApproval = pendingApprovals.at(pendingApprovalIndex);
+                if (member && role && action === 'approve') {
+                    // Remove existing roles associated to the elo
+                    await cleanupRoles(member);
 
-                if (!pendingApproval) {
-                    return;
+                    // Assign the new elo role
+                    await member.roles.add(role);
+                    console.log(`\x1b[32m[+] ${role.name}\x1b[0m`);
+
+                    await interaction.reply(`${userMention(member.id)} now has the ${role.name} role`);
+                } else if (action === 'reject') {
+                    await interaction.reply(`${userMention(userId)} your role update request was rejected`);
                 }
 
-                if (interactionCreate.customId === reviewResult.approved) {
-
-                    const rolesToRemove = member.roles.cache.filter((role) =>
-                        role.name in roles).filter((role) => role.name !== 'lol-elo-bot-approver');
-
-                    // eslint-disable-next-line max-len
-                    console.log(`Updating ${member.displayName} roles:\n\x1b[31m[-] ${rolesToRemove.map((role) => role.name).join(', ')}\x1b[0m\n\x1b[32m[+] ${pendingApproval.role.name}\x1b[0m`);
-
-                    for (const role of rolesToRemove) {
-                        await member.roles.remove(role);
-                        await member.roles.add(pendingApproval.role);
-                    }
-
-                    await interactionCreate.reply({
-                        content: '✅ Request approved',
-                        flags: [MessageFlags.Ephemeral],
-                    });
-                } else if (interactionCreate.customId === reviewResult.rejected) {
-                    return await interactionCreate.reply({
-                        content: '❌ Request rejected',
-                        flags: [MessageFlags.Ephemeral],
-                    });
-                }
-
-                await pendingApproval.message.delete();
-                pendingApprovals.splice(pendingApprovalIndex, 1);
+                await interaction.message.delete();
             }
         }
+    } catch (error) {
+        console.log(error);
     }
 };

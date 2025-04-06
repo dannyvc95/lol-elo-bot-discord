@@ -6,16 +6,14 @@ import {
     Client,
     Events,
     GatewayIntentBits,
-    GuildMember,
     Interaction,
     Message,
     OmitPartialGroupDMChannel,
-    Role,
 } from 'discord.js';
 
 import {handleMessageCreate} from './events/messageCreate';
 import {handleInteractionCreate} from './events/interactionCreate';
-// import {run} from './services/mongoDbService';
+import {connectDatabase} from './services/mongoDbService';
 
 const client = new Client({
     intents: [
@@ -26,16 +24,8 @@ const client = new Client({
     ]
 });
 
-// Temporal database mockup
-export const pendingApprovals: {
-    member: GuildMember;
-    role: Role;
-    message: OmitPartialGroupDMChannel<Message<boolean>>;
-}[] = [];
-
 client.once(Events.ClientReady, async (clientReady) => {
-    // Connect with the MongoDB database
-    // await run().catch(console.dir);
+    await connectDatabase().catch(console.dir);
     console.log(`Bot logged in as ${clientReady.user.tag}!`);
 });
 
