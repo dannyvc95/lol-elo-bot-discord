@@ -35,10 +35,11 @@ export const handleHonor = async (message: OmitPartialGroupDMChannel<Message<boo
                 const honorLevel = getHonorLevel(honorReceivedCount);
                 const level = honor[honorLevel];
                 const topFan = getTopFan(botUser.honor.honorReceived);
+                const topFanMessage = topFan?.userId && topFan?.count > 0 ? `:medal: ${spoiler(userMention(topFan.userId))} es tu mayor admirador, te ha dado ${topFan.count} honores.\n\n` : '';
                 const embed = new EmbedBuilder()
                     .setTitle(`⭐ ${botUser.displayName} es honor nivel ${honorLevel}!`)
                     .setDescription(`🎉 ¡Felicidades! Has recibido ${bold(honorReceivedCount.toString())} honores.\n\n
-                    ${topFan && `:medal: ${spoiler(userMention(topFan.userId))} es tu mayor admirador, te ha dado ${topFan.count} honores.\n\n`}
+                    ${topFanMessage}
                     :ticket: ${bold('Honor para dar:')} ${botUser.honor.honorBudgetCount.toString()}\n
                     :hourglass: ${bold('Honor gratis:')} ${freeHonorPendingHours === 0 ? 'Disponible :white_check_mark:' : `En ${freeHonorPendingHours} horas`}\n
                     :arrow_up: ${bold('Subir de nivel:')} ${`Recibe ${level.nextLevel - honorReceivedCount} honores más`}`)
@@ -59,7 +60,7 @@ export const handleHonor = async (message: OmitPartialGroupDMChannel<Message<boo
                 };
 
                 await createBotUser(newBotUser);
-                await message.reply(`${userMention(message.author.id)} creaaste tu perfil de honor exitosamente, ahora puedes utilizar el comando !honor`);
+                await message.reply(`${userMention(message.author.id)} creaste tu perfil de honor exitosamente, ahora puedes utilizar el comando !honor`);
             }
         } else if (message.content.length > commands.honor.length) {
             const user = message.mentions.users.first();
