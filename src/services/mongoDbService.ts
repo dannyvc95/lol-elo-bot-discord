@@ -37,6 +37,20 @@ export const getBotUserByUserId = async (userId: string) => {
     return null;
 };
 
+export const honorUser = async (userId: string, count: number) => {
+    try {
+        if (count > 0 && count <= 1000) {
+            const user = await BotUserModel.findOne({userId});
+            if (user) {
+                user.set({'honor.honorBudgetCount': Number(user.get('honor.honorBudgetCount')) + count});
+                await user.save();
+            }
+        }
+    } catch (error) {
+        console.error(error);
+    }
+};
+
 export const giveHonor = async (
     userToGiveUserId: string, giveCount: number, userToReceiveUserId: string, receiveCount: number, free: boolean) => {
     try {

@@ -1,10 +1,11 @@
-import {ActionRowBuilder, Collection, EmbedBuilder, Message, OmitPartialGroupDMChannel, quote, subtext, userMention} from 'discord.js';
-import {handlePing} from '../commands/ping';
+import {Message, OmitPartialGroupDMChannel} from 'discord.js';
 import {handleElo} from '../commands/elo';
-import {handleHonor} from '../commands/honor';
-import {handleStats} from '../commands/stats';
 import {handleFlame} from '../commands/flame';
 import {handleFle} from '../commands/fle';
+import {handleHonor} from '../commands/honor';
+import {handleNox} from '../commands/nox';
+import {handlePing} from '../commands/ping';
+import {handleStats} from '../commands/stats';
 import {createBotUser, getBotUserByUserId} from '../services/mongoDbService';
 
 export const commands = {
@@ -14,6 +15,7 @@ export const commands = {
     stats: '!stats ',
     flame: '!flame ',
     fle: '!fle',
+    nox: '!nox',
 };
 
 export const handleMessageCreate = async (message: OmitPartialGroupDMChannel<Message<boolean>>) => {
@@ -59,17 +61,8 @@ export const handleMessageCreate = async (message: OmitPartialGroupDMChannel<Mes
             } catch (error) {
                 console.error(error);
             }
-        } else if (message.content === '!x') {
-            await message.reply({
-                embeds: [
-                    new EmbedBuilder()
-                        .setTitle('🎉 ¡Honor! 🎉')
-                        // eslint-disable-next-line max-len
-                        .setDescription(quote(`${userMention(message.author.id)} le dio honor a ${userMention(message.author.id)}.`))
-                        .setImage('https://media.giphy.com/media/Anhzlimjf62oNKM9mt/giphy.gif')
-                        .setColor('#C89B3C')
-                ]
-            });
+        } else if (message.content === commands.nox) {
+            await handleNox(message);
         }
     } catch (error) {
         console.error(error);
