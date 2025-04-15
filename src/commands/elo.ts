@@ -8,6 +8,7 @@ import {
 import {commands} from '../events/messageCreate';
 import {getLeagueEntriesBySummonerName} from '../services/riotGamesService';
 import {calculateWinRate, getTierColor, getTierImageSource} from '../utils/utils';
+import {QueueType} from '../types/LeagueEntryDTO';
 
 const createCustomId = (action: 'approve' | 'reject', userId: string, roleId: string) => {
     return `${action}|${userId}|${roleId}`;
@@ -16,13 +17,21 @@ const createCustomId = (action: 'approve' | 'reject', userId: string, roleId: st
 export const handleElo = async (message: OmitPartialGroupDMChannel<Message<boolean>>) => {
     try {
         if (message.content.length > commands.elo.length && message.content.includes('#')) {
-            // Get the summoner name by getting rid of the command section of the message
-            const summonerName = message.content.substring(commands.elo.length);
+            let summonerName = '';
+            let queueType: QueueType = 'RANKED_SOLO_5x5';
+            if (message.content.startsWith('!elo flexq ')) {
+                summonerName = message.content.substring(11);
+                queueType = 'RANKED_FLEX_SR';
+            } else if (message.content.startsWith('!elo soloq ')) {
+                summonerName = message.content.substring(11);
+            } else {
+                summonerName = message.content.substring(commands.elo.length);
+            }
 
             const leagueEntries = await getLeagueEntriesBySummonerName(summonerName);
 
             if (leagueEntries) {
-                const rankedSoloDuo = leagueEntries.find(({queueType}) => queueType === 'RANKED_SOLO_5x5');
+                const rankedSoloDuo = leagueEntries.find((entry) => entry.queueType === queueType);
 
                 if (rankedSoloDuo) {
                     // Create relevant fields to show in the embed answer
