@@ -46,7 +46,7 @@ export const handleFlame = async (message: OmitPartialGroupDMChannel<Message<boo
 
             await message.reply({
                 embeds: [new EmbedBuilder()
-                    .setTitle(`${guildMember.nickname || guildMember.displayName} dice:`)
+                    .setTitle(`${message.author.displayName} dice:`)
                     .setDescription(`<@${user.id}>, \n\n${insultMessage}\n\n Saludos!`)
                     .setThumbnail(`${ASSETS_IMAGE_SOURCE}/gato_3.png`)
                     .setColor('#FF0000')]

@@ -11,6 +11,8 @@ import {
     OmitPartialGroupDMChannel,
 } from 'discord.js';
 
+import './deploy-commands';
+
 import {handleMessageCreate} from './events/messageCreate';
 import {handleInteractionCreate} from './events/interactionCreate';
 import {connectDatabase} from './services/mongoDbService';

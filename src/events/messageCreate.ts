@@ -1,4 +1,4 @@
-import {Message, OmitPartialGroupDMChannel} from 'discord.js';
+import {bold, Message, OmitPartialGroupDMChannel} from 'discord.js';
 import {handleElo} from '../commands/elo';
 import {handleFlame} from '../commands/flame';
 import {handleFle} from '../commands/fle';
@@ -20,6 +20,14 @@ export const commands = {
 
 export const handleMessageCreate = async (message: OmitPartialGroupDMChannel<Message<boolean>>) => {
     try {
+        const noxUserId = '496463911604715541';
+        if (!message.author.bot && !message.mentions.everyone &&
+            !message.reference && message.mentions.users.has(noxUserId)) {
+            // eslint-disable-next-line max-len
+            const noxMessage = `Hola,\n\nlamentablemente ${bold('Nox')} está chambeando y no tiene tiempo para sus mamadas. Por favor intente más tarde.\n\nSi no eres Thonking, perdón ahorita te contesto xD.`;
+            await message.reply(noxMessage);
+        }
+
         if (message.content === commands.ping) {
             await handlePing(message);
         } else if (message.content.startsWith(commands.elo)) {
@@ -63,6 +71,8 @@ export const handleMessageCreate = async (message: OmitPartialGroupDMChannel<Mes
             }
         } else if (message.content === commands.nox) {
             await handleNox(message);
+        } else if (message.content === '!cookie') {
+            await message.reply('Comando para Flor, pero no dijo que quiere que haga...');
         }
     } catch (error) {
         console.error(error);

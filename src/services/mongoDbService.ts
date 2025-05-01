@@ -17,6 +17,15 @@ export async function connectDatabase() {
     }
 }
 
+export function pingDatabase(): boolean {
+    try {
+        return mongoose.connection.readyState === 1;
+    } catch (error) {
+        console.error(error);
+    }
+    return false;
+}
+
 export const createBotUser = async (botUser: BotUser) => {
     try {
         return await new BotUserModel(botUser).save();

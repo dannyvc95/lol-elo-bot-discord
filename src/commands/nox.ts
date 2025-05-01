@@ -1,4 +1,4 @@
-import {bold, EmbedBuilder, Message, OmitPartialGroupDMChannel} from 'discord.js';
+import {bold, EmbedBuilder, Message, OmitPartialGroupDMChannel, quote} from 'discord.js';
 import {honorUser} from '../services/mongoDbService';
 
 export const handleNox = async (message: OmitPartialGroupDMChannel<Message<boolean>>) => {
@@ -26,7 +26,7 @@ export const handleNox = async (message: OmitPartialGroupDMChannel<Message<boole
                         new EmbedBuilder()
                             .setTitle('¡Comando secreto!')
                             .setDescription(`Parece que encontraste mi comando secreto.
-                                Toma ${bold('10')} honores como regalo 🤓💙`)
+                                Toma ${bold('10')} honores como regalo 🤓💙 - te quiere (o no) ${quote('Nox')}`)
                             .setImage('https://media.giphy.com/media/TuzTiPbTX5FSATdFYx/giphy.gif')
                             .setColor('DarkVividPink')
                     ]

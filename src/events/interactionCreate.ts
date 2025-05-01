@@ -1,5 +1,8 @@
-import {CacheType, GuildMember, Interaction, userMention} from 'discord.js';
+import {CacheType, ChatInputCommandInteraction, GuildMember, Interaction, userMention} from 'discord.js';
 import roles from '../configs/roles.json';
+import {executeInitCommand} from '../commands/slash/init';
+import {executeEloCommand} from '../commands/slash/elo';
+import {executeOutCommand} from '../commands/slash/out';
 
 const isApprover = async (interaction: Interaction<CacheType>, userId: string) => {
     try {
@@ -50,7 +53,17 @@ export const handleInteractionCreate = async (interaction: Interaction<CacheType
                     await interaction.reply(`${userMention(userId)} your role update request was rejected`);
                 }
 
-                await interaction.message.delete();
+                await interaction.message.edit({embeds: interaction.message.embeds, components: []});
+            }
+        } else if (interaction.isChatInputCommand() && interaction.isCommand()) {
+            const command = interaction as ChatInputCommandInteraction;
+
+            if (command.commandName === 'init') {
+                await executeInitCommand(command);
+            } else if (command.commandName === 'elo') {
+                await executeEloCommand(command);
+            } else if (command.commandName === 'out') {
+                await executeOutCommand(command);
             }
         }
     } catch (error) {
