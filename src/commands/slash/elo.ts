@@ -1,4 +1,5 @@
 import {
+    bold,
     ButtonStyle,
     ChatInputCommandInteraction,
     ComponentType,
@@ -14,15 +15,16 @@ import {QueueType} from '../../types/LeagueEntryDTO';
 
 export const eloCommand = new SlashCommandBuilder()
     .setName('elo')
-    .setDescription('Get the League of Legends rank for a summoner')
+    // eslint-disable-next-line max-len
+    .setDescription('Muestra información de tu liga y división entre otras estadísticas, también puedes obtener un rol.')
     .addStringOption(option =>
         option.setName('summoner')
-            .setDescription('Summoner name with tag (e.g., MySummoner#LAN)')
+            .setDescription('Nombre de jugador y lema (por ejemplo, NoxMajesty#LAN)')
             .setRequired(true)
     )
     .addStringOption(option =>
         option.setName('queue')
-            .setDescription('Queue type: solo or flex')
+            .setDescription('Elige entre Solo/Duo o Flex')
             .addChoices(
                 {name: 'Solo/Duo', value: 'RANKED_SOLO_5x5'},
                 {name: 'Flex', value: 'RANKED_FLEX_SR'}
@@ -40,7 +42,8 @@ export async function executeEloCommand(interaction: ChatInputCommandInteraction
 
         if (!leagueEntries) {
             await interaction.reply({
-                content: `:skull: ${summonerName} is unranked or does not exist`,
+                // eslint-disable-next-line max-len
+                content: `:skull: No pude encontrar a ${bold(summonerName)}, probablemente la cuenta es UNRANKED o no existe en el servidor de LAN.`,
                 ephemeral: true
             });
             return;
@@ -50,7 +53,7 @@ export async function executeEloCommand(interaction: ChatInputCommandInteraction
 
         if (!ranked) {
             await interaction.reply({
-                content: `No data found for ${summonerName} in selected queue.`,
+                content: `No encontré información de ${summonerName} para la cola seleccionada.`,
                 ephemeral: true
             });
             return;
@@ -58,39 +61,39 @@ export async function executeEloCommand(interaction: ChatInputCommandInteraction
 
         const fields = [
             {
-                name: 'Ranked',
+                name: 'Este es tu rango:',
                 value: `${ranked.tier} ${ranked.rank} (${ranked.leaguePoints} PL)`,
                 inline: false,
             },
             {
-                name: '\nGames',
+                name: '\nJuegos:',
                 value: String(ranked.wins + ranked.losses),
                 inline: true,
             },
             {
-                name: 'Wins',
+                name: 'Victorias:',
                 value: String(ranked.wins),
                 inline: true,
             },
             {
-                name: 'Losses',
+                name: 'Derrotas:',
                 value: String(ranked.losses),
                 inline: true,
             },
             {
-                name: 'Win rate',
+                name: 'Tasa de victoria:',
                 value: `${calculateWinRate(ranked.wins, ranked.losses)}%`,
                 inline: false,
             },
             {
-                name: '\nYour OP.GG',
+                name: '\nPuedes ir a OP.GG para obtener más detalles:',
                 // eslint-disable-next-line max-len
                 value: `[op.gg/${summonerName.replace('#', '-')}](${process.env.OP_GG_PROFILE_URL}/${summonerName.replace('#', '-')})`
             }
         ];
 
         const embed = new EmbedBuilder()
-            .setTitle(`Info for ${summonerName}`)
+            .setTitle(`${bold(summonerName)}`)
             .setFields(fields)
             .setColor(getTierColor(ranked.tier))
             .setImage(getTierImageSource(ranked.tier));
@@ -103,13 +106,13 @@ export async function executeEloCommand(interaction: ChatInputCommandInteraction
             embeds: [embed],
             components: [{components: [{
                 custom_id: createCustomId('reject', member?.id ?? '', newRole?.id ?? ''),
-                label: 'Reject',
+                label: 'Rechazar',
                 style: ButtonStyle.Secondary,
                 type: ComponentType.Button
             },
             {
                 custom_id: createCustomId('approve', member?.id ?? '', newRole?.id ?? ''),
-                label: 'Approve',
+                label: 'Aprobar',
                 style: ButtonStyle.Primary,
                 type: ComponentType.Button
             }], type: ComponentType.ActionRow}],

@@ -3,6 +3,7 @@ import roles from '../configs/roles.json';
 import {executeInitCommand} from '../commands/slash/init';
 import {executeEloCommand} from '../commands/slash/elo';
 import {executeOutCommand} from '../commands/slash/out';
+import {executePingCommand} from '../commands/slash/ping';
 
 const isApprover = async (interaction: Interaction<CacheType>, userId: string) => {
     try {
@@ -64,6 +65,8 @@ export const handleInteractionCreate = async (interaction: Interaction<CacheType
                 await executeEloCommand(command);
             } else if (command.commandName === 'out') {
                 await executeOutCommand(command);
+            } else if (command.commandName === 'ping') {
+                await executePingCommand(command);
             }
         }
     } catch (error) {

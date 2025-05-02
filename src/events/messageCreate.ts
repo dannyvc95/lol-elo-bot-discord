@@ -1,16 +1,13 @@
-import {bold, Message, OmitPartialGroupDMChannel} from 'discord.js';
-import {handleElo} from '../commands/elo';
+import {inlineCode, Message, OmitPartialGroupDMChannel, userMention} from 'discord.js';
 import {handleFlame} from '../commands/flame';
 import {handleFle} from '../commands/fle';
 import {handleHonor} from '../commands/honor';
 import {handleNox} from '../commands/nox';
-import {handlePing} from '../commands/ping';
 import {handleStats} from '../commands/stats';
 import {createBotUser, getBotUserByUserId} from '../services/mongoDbService';
 
 export const commands = {
-    ping: '!ping',
-    elo: '!elo ',
+    elo: '!elo',
     honor: '!honor',
     stats: '!stats ',
     flame: '!flame ',
@@ -20,18 +17,9 @@ export const commands = {
 
 export const handleMessageCreate = async (message: OmitPartialGroupDMChannel<Message<boolean>>) => {
     try {
-        const noxUserId = '496463911604715541';
-        if (!message.author.bot && !message.mentions.everyone &&
-            !message.reference && message.mentions.users.has(noxUserId)) {
+        if (message.content.startsWith(commands.elo)) {
             // eslint-disable-next-line max-len
-            const noxMessage = `Hola,\n\nlamentablemente ${bold('Nox')} está chambeando y no tiene tiempo para sus mamadas. Por favor intente más tarde.\n\nSi no eres Thonking, perdón ahorita te contesto xD.`;
-            await message.reply(noxMessage);
-        }
-
-        if (message.content === commands.ping) {
-            await handlePing(message);
-        } else if (message.content.startsWith(commands.elo)) {
-            await handleElo(message);
+            await message.reply(`Hola ${userMention(message.author.id)}, por favor utiliza el comando ${inlineCode('/elo')}`);
         } else if (message.content.startsWith(commands.honor)) {
             await handleHonor(message);
         } else if (message.content.startsWith(commands.stats)) {
@@ -72,7 +60,7 @@ export const handleMessageCreate = async (message: OmitPartialGroupDMChannel<Mes
         } else if (message.content === commands.nox) {
             await handleNox(message);
         } else if (message.content === '!cookie') {
-            await message.reply('Comando para Flor, pero no dijo que quiere que haga...');
+            await message.reply('Comando para Flor, ya me dijo que quiere.');
         }
     } catch (error) {
         console.error(error);

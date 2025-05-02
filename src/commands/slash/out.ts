@@ -1,17 +1,18 @@
-import {SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder, userMention, codeBlock} from 'discord.js';
+import {
+    SlashCommandBuilder,
+    ChatInputCommandInteraction,
+    EmbedBuilder,
+    userMention,
+    inlineCode,
+    bold,
+} from 'discord.js';
 import rolesJson from '../../configs/roles.json';
 
 export const outCommand = new SlashCommandBuilder()
     .setName('out')
-    .setDescription('Removes all elo roles associated to the user.');
+    .setDescription('Elimina los roles de elo de tu usuario.');
 
 export async function executeOutCommand(interaction: ChatInputCommandInteraction) {
-
-    console.log('Executing out command...');
-
-    const description = `${userMention(interaction.member?.user.id ?? '')}, removí tus roles de elo.
-        \nRecuerda que si quieres volver puedes utilizar el comando ${codeBlock('/elo Summoner name#TAG')}\n`;
-
     try {
         const guildMembers = await interaction.guild?.members.fetch();
         if (guildMembers?.find(({id}) => id === interaction.member?.user.id)) {
@@ -28,16 +29,19 @@ export async function executeOutCommand(interaction: ChatInputCommandInteraction
                 }
             }
         }
+
+        // eslint-disable-next-line max-len
+        const description = `${userMention(interaction.member?.user.id ?? '')}, eliminé tus roles de elo. Recuerda que si quieres, puedes volver a obtener tu rol con el comando ${inlineCode('/elo')}.`;
+
+        const embed = new EmbedBuilder()
+            .setTitle(bold('👋 Hasta pronto...'))
+            .setDescription(`${description}`)
+            // eslint-disable-next-line max-len
+            .setImage('https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2lkdzU1dnZocXp6M2U1azc1ZnY0M3g2eXZpYXRzM2hlaTB3MHUweiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/5Ay8TJlVmtWh6XYznJ/giphy.gif')
+            .setColor('#FFFFFF');
+
+        await interaction.reply({embeds: [embed]});
     } catch (error) {
         console.error(error);
     }
-
-    const embed = new EmbedBuilder()
-        .setTitle('👋 Adiós...')
-        .setDescription(`${description}`)
-        // eslint-disable-next-line max-len
-        .setImage('https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2lkdzU1dnZocXp6M2U1azc1ZnY0M3g2eXZpYXRzM2hlaTB3MHUweiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/5Ay8TJlVmtWh6XYznJ/giphy.gif')
-        .setColor('#FFFFFF');
-
-    await interaction.reply({embeds: [embed]});
 }
