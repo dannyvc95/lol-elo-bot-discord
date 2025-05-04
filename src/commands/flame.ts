@@ -1,4 +1,4 @@
-import {EmbedBuilder, Message, OmitPartialGroupDMChannel} from 'discord.js';
+import {EmbedBuilder, Message, OmitPartialGroupDMChannel, userMention} from 'discord.js';
 import {commands} from '../events/messageCreate';
 import roles from '../configs/roles.json';
 import insults from '../resources/insults.json';
@@ -8,6 +8,12 @@ import {Tier} from '../types/LeagueEntryDTO';
 const {
     ASSETS_IMAGE_SOURCE,
 } = process.env;
+
+const getRandomInsultMessage = (role: string) => {
+    return role in insults && role !== 'UNRANKED' ?
+        'Eres una puta.\n\n' + insults[role as Tier][getRandomInteger(insults[role as Tier].length)].es :
+        'Eres una puta.\n\n' + insults.UNRANKED[getRandomInteger(insults.UNRANKED.length)].es;
+};
 
 export const handleFlame = async (message: OmitPartialGroupDMChannel<Message<boolean>>) => {
     try {
@@ -37,19 +43,17 @@ export const handleFlame = async (message: OmitPartialGroupDMChannel<Message<boo
                 .filter((role) => role.name !== '@everyone')
                 .map((role) => role.name);
 
-            const roleInsult = (guildMemberRoles.filter((role) =>
+            const role = (guildMemberRoles.filter((role) =>
                 role in roles && role !== 'lol-elo-bot-approver').at(0) ?? 'UNRANKED') as Tier | 'UNRANKED';
 
-            const randomNumber = getRandomInteger(insults[roleInsult].length);
-            let insultMessage = 'Eres una puta.\n';
-            insultMessage += insults[roleInsult][randomNumber].es;
+            const description = `${userMention(user.id)}, \n\n${getRandomInsultMessage(role)}\n\n Saludos coordiales.`;
 
             await message.reply({
                 embeds: [new EmbedBuilder()
                     .setTitle(`${message.author.displayName} dice:`)
-                    .setDescription(`<@${user.id}>, \n\n${insultMessage}\n\n Saludos!`)
+                    .setDescription(description)
                     .setThumbnail(`${ASSETS_IMAGE_SOURCE}/gato_3.png`)
-                    .setColor('#FF0000')]
+                    .setColor('#C89B3C')],
             });
         }
     } catch (error) {

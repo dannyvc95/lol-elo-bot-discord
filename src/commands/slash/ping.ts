@@ -10,7 +10,7 @@ export async function executePingCommand(interaction: ChatInputCommandInteractio
             .setTitle(bold('Pong!'))
             .setDescription('El bot está en línea.')
             .setThumbnail('https://media.giphy.com/media/7mK9NefOGX6XqnnNGo/giphy.gif')
-            .setColor('#FFFFFF');
+            .setColor('#005A82');
 
         await interaction.reply({embeds: [embed]});
     } catch (error) {
