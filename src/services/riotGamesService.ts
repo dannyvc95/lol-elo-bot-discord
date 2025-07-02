@@ -5,6 +5,7 @@ import {ChampionDTO} from '../types/ChampionDTO';
 import {ChampionMasteryDTO} from '../types/ChampionMasteryDTO';
 
 import champion from '../resources/champion.json';
+import {MatchDto} from '../types/MatchDTO';
 
 const {
     RIOT_GAMES_API_AMERICAS_ACCOUNTS_BY_RIOT_ID,
@@ -14,7 +15,7 @@ const {
     RIOT_GAMES_API_KEY,
 } = process.env;
 
-const getPuuidBySummonerName = async (summonerName: string): Promise<string | null> => {
+export const getPuuidBySummonerName = async (summonerName: string): Promise<string | null> => {
     try {
         const [gameName, tagLine] = summonerName.split('#');
 
@@ -23,6 +24,37 @@ const getPuuidBySummonerName = async (summonerName: string): Promise<string | nu
 
         if (status === 200) {
             return data.puuid;
+        }
+    } catch (error) {
+        console.error((error as AxiosError).cause);
+    }
+
+    return null;
+};
+
+export const getMatchesIdsByPuuid = async (puuid: string): Promise<string[] | null> => {
+    try {
+        // eslint-disable-next-line max-len
+        const {data, status} = await axios.get(`https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=20&api_key=${RIOT_GAMES_API_KEY}`);
+
+        if (status === 200 && Array.isArray(data)) {
+            return data as string[];
+        }
+    } catch (error) {
+        console.error((error as AxiosError).cause);
+    }
+
+    return null;
+};
+
+export const getMatchById = async (id: string): Promise<MatchDto | null> => {
+    try {
+        // eslint-disable-next-line max-len
+        const {data, status} = await axios.get(`https://americas.api.riotgames.com/lol/match/v5/matches/${id}?api_key=${RIOT_GAMES_API_KEY}`);
+
+        if (status === 200) {
+            console.log(data);
+            return data as MatchDto;
         }
     } catch (error) {
         console.error((error as AxiosError).cause);

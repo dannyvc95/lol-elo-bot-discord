@@ -4,6 +4,7 @@ import {initCommand as initCommand} from './commands/slash/init';
 import {eloCommand as eloCommand} from './commands/slash/elo';
 import {outCommand as outCommand} from './commands/slash/out';
 import {pingCommand as pingCommand} from './commands/slash/ping';
+import {friendsCommand as friendsCommand} from './commands/slash/friends';
 
 
 config();
@@ -13,6 +14,7 @@ const commands = [
     eloCommand.toJSON(),
     outCommand.toJSON(),
     pingCommand.toJSON(),
+    friendsCommand.toJSON(),
 ];
 
 const rest = new REST({version: '10'}).setToken(process.env.DISCORD_BOT_TOKEN!);

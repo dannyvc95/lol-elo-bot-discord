@@ -4,6 +4,7 @@ import {executeInitCommand} from '../commands/slash/init';
 import {executeEloCommand} from '../commands/slash/elo';
 import {executeOutCommand} from '../commands/slash/out';
 import {executePingCommand} from '../commands/slash/ping';
+import {executeFriendsCommand} from '../commands/slash/friends';
 
 const isApprover = async (interaction: Interaction<CacheType>, userId: string) => {
     try {
@@ -67,6 +68,8 @@ export const handleInteractionCreate = async (interaction: Interaction<CacheType
                 await executeOutCommand(command);
             } else if (command.commandName === 'ping') {
                 await executePingCommand(command);
+            } else if (command.commandName === 'friends') {
+                await executeFriendsCommand(command);
             }
         }
     } catch (error) {
